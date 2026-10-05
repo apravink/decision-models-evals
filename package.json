@@ -1,0 +1,20 @@
+{
+  "name": "decision-models-evals",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit -p packages/shared && tsc --noEmit -p apps/eval-worker",
+    "dev:worker": "npm run dev -w apps/eval-worker",
+    "dev:dashboard": "npm run dev -w apps/dashboard",
+    "deploy": "npm run deploy -w apps/eval-worker",
+    "migrate:local": "npm run migrations:local -w apps/eval-worker",
+    "migrate:remote": "npm run migrations:remote -w apps/eval-worker"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}
