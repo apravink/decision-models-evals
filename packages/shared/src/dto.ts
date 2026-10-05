@@ -9,10 +9,11 @@ export interface SeriesPoint {
 }
 
 export interface RunSummary {
-  id: number;
+  id: string;
   run_ts: string;
-  provider: string;
-  model_served: string;
+  suite_id: string;
+  model_requested: string;
+  model_served: string | null;
   status: RunStatus;
   latency_ms: number;
   mean_score: number;

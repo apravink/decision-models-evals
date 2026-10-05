@@ -59,8 +59,8 @@ apps/dashboard/             # SvelteKit: routes/+page, routes/api/*, hooks.serve
 interface Suite {
   id: string;                                            // "nba" | "politics" | "weather"
   version(): string;                                     // bump on template change → suite_version
-  pendingQuestions(env): Promise<QuestionSpec[]>;        // state + instructions + resolves_at
-  outcomesFor(env, ids): Promise<Map<string, Outcome | null>>;  // null = not yet known
+  pendingQuestions(env, now): Promise<PendingBatch | null>;  // {state, questions[]} — one fan-out call per tick
+  outcomesFor(env, ids): Promise<Map<string, Outcome | null>>; // absent = not yet known
 }
 ```
 - Core owns (written once, domain-free): tick loop, one fan-out `systemone` call per (suite × model), ingest, matured-answers query (`resolved_ts IS NULL AND resolves_at <= now`), scoring: noul → `correct = (p > 0.5) == o`, `score = (p − o)²`; choice → `correct = choice == winner`, multiclass Brier from stored probabilities. Log-loss and accuracy trends derive at read time from stored raws — no duplicate truth.
@@ -104,6 +104,6 @@ nba_games(id PK [balldontlie], date, datetime, season, postseason,
 **Phases:**
 - **0** [done 2026-10-04] Scaffold workspaces, TS strict (NFR-3)
 - **1** [done 2026-10-04] Shared types, D1 migration v1, local dev setup — cron + D1 verified locally (REQ-2, NFR-2)
-- **2** NEXT — (a) schema v2 + shared-types rewrite (real SystemOne shapes: answers-as-map, noul-has-no-confidence; Suite/QuestionSpec/Outcome types) → (b) generic core: tick/ingester/resolver/jev with a mock suite → (c) NBA suite + seed script → (d) local verification: mock Jev endpoint, real local D1, `--test-scheduled` (REQ-1, REQ-2, REQ-5)
+- **2** [done 2026-10-05] Eval worker — (a) schema v2 + shared-types rewrite (b) generic core: tick/ingester/resolver/jev (SDK + fetch-tee archival) (c) NBA suite + seed script (d) verified locally end-to-end via mock Jev: dual-model runs, deferred resolution with correct/Brier, verbatim raws (REQ-1, REQ-2, REQ-5). Pending real-key runs: balldontlie seed + first real Jev call.
 - **3** API routes: `series`, `runs`, `health` — SQL time-bucketing, percentiles in TS, `suite_id` filter (REQ-3)
 - **4** Dashboard: accuracy/Brier/calibration/latency charts, latest-vs-pinned comparison, theme — iterate together (REQ-4)
