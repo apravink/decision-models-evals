@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+.svelte-kit/
+.wrangler/
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite3
+*.log
+.DS_Store
